@@ -1,0 +1,3 @@
+# Program ini sengaja hanya memakai Python standard library (threading, random, time).
+# Tidak ada dependency eksternal yang wajib. Tambahkan di sini jika kelompok kalian
+# butuh library tambahan (mis. untuk logging berwarna) - jelaskan alasannya di README.md.
