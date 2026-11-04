@@ -1,0 +1,73 @@
+=== Skenario awal: 4 node bergabung ===
+[JOIN] Node 'node-jakarta-1' (id=177) bergabung, alamat 10.0.0.1
+    (ring sebelumnya kosong, tidak ada data untuk dipindah)
+[JOIN] Node 'node-jakarta-2' (id=102) bergabung, alamat 10.0.0.2
+    (tidak ada key yang berpindah tanggung jawab)
+[JOIN] Node 'node-bandung-1' (id=40) bergabung, alamat 10.0.0.3
+    (tidak ada key yang berpindah tanggung jawab)
+[JOIN] Node 'node-surabaya-1' (id=136) bergabung, alamat 10.0.0.4
+    (tidak ada key yang berpindah tanggung jawab)
+
+=== Daftarkan beberapa kurir ===
+[REGISTER] kurir-001 (hash=50) -> 192.168.1.10, disimpan di node-jakarta-2(id=102, 10.0.0.2)
+[REGISTER] kurir-002 (hash=28) -> 192.168.1.11, disimpan di node-bandung-1(id=40, 10.0.0.3)
+[REGISTER] kurir-003 (hash=132) -> 192.168.1.12, disimpan di node-surabaya-1(id=136, 10.0.0.4)
+[REGISTER] kurir-005 (hash=175) -> 192.168.1.14, disimpan di node-jakarta-1(id=177, 10.0.0.1)
+[REGISTER] kurir-006 (hash=217) -> 192.168.1.15, disimpan di node-bandung-1(id=40, 10.0.0.3)
+
+--- Lookup sebelum perubahan topologi ---
+  kurir-001 (hash=50) -> node-jakarta-2(id=102, 10.0.0.2) -> 192.168.1.10
+  kurir-002 (hash=28) -> node-bandung-1(id=40, 10.0.0.3) -> 192.168.1.11
+  kurir-006 (hash=217) -> node-bandung-1(id=40, 10.0.0.3) -> 192.168.1.15
+  Ring (urut naik):
+    node-bandung-1(id=40, 10.0.0.3)  memegang: kurir-002(h=28), kurir-006(h=217)
+    node-jakarta-2(id=102, 10.0.0.2)  memegang: kurir-001(h=50)
+    node-surabaya-1(id=136, 10.0.0.4)  memegang: kurir-003(h=132)
+    node-jakarta-1(id=177, 10.0.0.1)  memegang: kurir-005(h=175)
+
+=== Node baru bergabung (tidak mengambil key apa pun) ===
+[JOIN] Node 'node-medan-1' (id=123) bergabung, alamat 10.0.0.5
+    (tidak ada key yang berpindah tanggung jawab)
+  kurir-001 (hash=50) -> node-jakarta-2(id=102, 10.0.0.2) -> 192.168.1.10
+
+=== Node baru bergabung (mengambil alih kurir-001) ===
+[JOIN] Node 'node-semarang-1' (id=77) bergabung, alamat 10.0.0.6
+    kurir-001 (hash=50, ip=192.168.1.10): node-jakarta-2(id=102, 10.0.0.2) -> node-semarang-1(id=77, 10.0.0.6)  [node baru menjadi successor key]
+  kurir-001 (hash=50) -> node-semarang-1(id=77, 10.0.0.6) -> 192.168.1.10
+  Ring (urut naik):
+    node-bandung-1(id=40, 10.0.0.3)  memegang: kurir-002(h=28), kurir-006(h=217)
+    node-semarang-1(id=77, 10.0.0.6)  memegang: kurir-001(h=50)
+    node-jakarta-2(id=102, 10.0.0.2)  memegang: -
+    node-medan-1(id=123, 10.0.0.5)  memegang: -
+    node-surabaya-1(id=136, 10.0.0.4)  memegang: kurir-003(h=132)
+    node-jakarta-1(id=177, 10.0.0.1)  memegang: kurir-005(h=175)
+
+=== Sebuah node keluar (wrap-around: kurir-005 pindah ke node terkecil) ===
+[LEAVE] Node 'node-jakarta-1' (id=177) keluar dari ring
+    kurir-005 (hash=175, ip=192.168.1.14): node-jakarta-1(id=177, 10.0.0.1) -> node-bandung-1(id=40, 10.0.0.3)  [node keluar]
+  kurir-001 (hash=50) -> node-semarang-1(id=77, 10.0.0.6) -> 192.168.1.10
+  kurir-002 (hash=28) -> node-bandung-1(id=40, 10.0.0.3) -> 192.168.1.11
+  kurir-005 (hash=175) -> node-bandung-1(id=40, 10.0.0.3) -> 192.168.1.14
+  Ring (urut naik):
+    node-bandung-1(id=40, 10.0.0.3)  memegang: kurir-002(h=28), kurir-005(h=175), kurir-006(h=217)
+    node-semarang-1(id=77, 10.0.0.6)  memegang: kurir-001(h=50)
+    node-jakarta-2(id=102, 10.0.0.2)  memegang: -
+    node-medan-1(id=123, 10.0.0.5)  memegang: -
+    node-surabaya-1(id=136, 10.0.0.4)  memegang: kurir-003(h=132)
+
+=== Node pemegang kurir-001 keluar ===
+[LEAVE] Node 'node-semarang-1' (id=77) keluar dari ring
+    kurir-001 (hash=50, ip=192.168.1.10): node-semarang-1(id=77, 10.0.0.6) -> node-jakarta-2(id=102, 10.0.0.2)  [node keluar]
+  kurir-001 (hash=50) -> node-jakarta-2(id=102, 10.0.0.2) -> 192.168.1.10
+  Ring (urut naik):
+    node-bandung-1(id=40, 10.0.0.3)  memegang: kurir-002(h=28), kurir-005(h=175), kurir-006(h=217)
+    node-jakarta-2(id=102, 10.0.0.2)  memegang: kurir-001(h=50)
+    node-medan-1(id=123, 10.0.0.5)  memegang: -
+    node-surabaya-1(id=136, 10.0.0.4)  memegang: kurir-003(h=132)
+
+=== Kurir pindah jaringan: IP berubah, ID tetap ===
+[REGISTER] kurir-001 (hash=50) -> 172.16.5.77, disimpan di node-jakarta-2(id=102, 10.0.0.2)
+  kurir-001 (hash=50) -> node-jakarta-2(id=102, 10.0.0.2) -> 172.16.5.77
+
+=== Kurir tidak dikenal ===
+  kurir-999 (hash=215) -> node-bandung-1(id=40, 10.0.0.3) -> None
